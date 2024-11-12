@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create the Users Table -->
+    <changeSet id="1" author="init">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)" />
+        </createTable>
+    </changeSet>
+
+    <!-- Create the User Profiles Table -->
+    <changeSet id="2" author="init">
+        <createTable tableName="user_profiles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)" />
+            <column name="email" type="VARCHAR(100)" />
+            <column name="phone" type="VARCHAR(20)" />
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" unique="true" foreignKeyName="fk_user_profiles_user"
+                             references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create the Credit Cards Table -->
+    <changeSet id="3" author="init">
+        <createTable tableName="credit_cards">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="encrypted_card_number" type="VARCHAR(255)" />
+            <column name="card_holder_name" type="VARCHAR(100)" />
+            <column name="expiry_date" type="VARCHAR(10)" />
+            <column name="masked_card_number" type="VARCHAR(20)" />
+            <column name="card_token" type="VARCHAR(50)">
+                <constraints unique="true"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_credit_cards_user"
+                             references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Insert Sample User Data -->
+    <changeSet id="4" author="init">
+        <insert tableName="users">
+            <column name="username" value="testuser"/>
+            <column name="password" value="password" /> <!-- Replace with a hashed password -->
+        </insert>
+    </changeSet>
+
+    <!-- New ChangeSet for Token Blacklist Table -->
+    <changeSet id="5" author="init">
+        <createTable tableName="token_blacklist_entry">
+            <column name="token" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMPTZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
