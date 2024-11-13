@@ -14,7 +14,7 @@ public class CreditCard {
     private String cardHolderName;
     private String expiryDate;
 
-    @Column(unique = true)
+    @Column(name = "card_token", unique = true, nullable = false)
     private String cardToken;
 
     @ManyToOne

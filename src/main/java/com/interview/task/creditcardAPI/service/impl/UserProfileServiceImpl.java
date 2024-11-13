@@ -7,6 +7,8 @@ import com.interview.task.creditcardAPI.repository.jpa.UserProfileRepository;
 import com.interview.task.creditcardAPI.repository.jpa.UserRepository;
 import com.interview.task.creditcardAPI.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,8 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .collect(Collectors.toList());
     }
 
+
+    @CacheEvict(value = "userProfiles", key = "#userDetails.username")
     @Override
     public Optional<UserProfileDTO> createOrUpdateUserProfile(UserDetails userDetails, UserProfile userProfile) {
         Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
@@ -41,9 +45,9 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         if (existingProfile.isPresent()) {
             UserProfile profileToUpdate = existingProfile.get();
-            profileToUpdate.setName(userProfile.getName());
-            profileToUpdate.setEmail(userProfile.getEmail());
-            profileToUpdate.setPhone(userProfile.getPhone());
+            if (userProfile.getName() != null) profileToUpdate.setName(userProfile.getName());
+            if (userProfile.getEmail() != null) profileToUpdate.setEmail(userProfile.getEmail());
+            if (userProfile.getPhone() != null) profileToUpdate.setPhone(userProfile.getPhone());
             UserProfile updatedProfile = userProfileRepository.save(profileToUpdate);
             return Optional.of(mapToDTO(updatedProfile));
         } else {
@@ -53,14 +57,14 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
     }
 
+
+    @Cacheable(value = "userProfiles", key = "#userDetails.username")
     @Override
     public Optional<UserProfileDTO> getUserProfile(UserDetails userDetails) {
         Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
-        if (user.isPresent()) {
-            return userProfileRepository.findByUserId(user.get().getId())
-                    .map(this::mapToDTO);
-        }
-        return Optional.empty();
+        return user.
+                flatMap(value -> userProfileRepository.findByUserId(value.getId())
+                .map(this::mapToDTO));
     }
 
     private UserProfileDTO mapToDTO(UserProfile userProfile) {
@@ -69,6 +73,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         dto.setName(userProfile.getName());
         dto.setEmail(userProfile.getEmail());
         dto.setPhone(userProfile.getPhone());
+        dto.setUserId(userProfile.getUser().getId());
         return dto;
     }
 }

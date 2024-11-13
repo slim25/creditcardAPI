@@ -40,8 +40,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/credit-cards/all").hasRole("ADMIN")
+                        .requestMatchers("/api/credit-cards/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/user-profiles/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/user-profiles/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/admin/activity-logs/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )

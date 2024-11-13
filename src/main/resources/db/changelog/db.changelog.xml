@@ -6,7 +6,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <!-- Create the Users Table -->
-    <changeSet id="1" author="init">
+    <changeSet id="create_users_table" author="Oleksandr">
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -19,7 +19,7 @@
     </changeSet>
 
     <!-- Create the User Profiles Table -->
-    <changeSet id="2" author="init">
+    <changeSet id="create_user_profiles_table" author="Oleksandr">
         <createTable tableName="user_profiles">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -35,7 +35,7 @@
     </changeSet>
 
     <!-- Create the Credit Cards Table -->
-    <changeSet id="3" author="init">
+    <changeSet id="create_credit_cards_table" author="Oleksandr">
         <createTable tableName="credit_cards">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -56,7 +56,7 @@
     </changeSet>
 
     <!-- Insert Sample User Data -->
-    <changeSet id="4" author="init">
+    <changeSet id="insert_test_user" author="Oleksandr">
         <insert tableName="users">
             <column name="username" value="testuser"/>
             <column name="password" value="password" /> <!-- Replace with a hashed password -->
@@ -64,7 +64,7 @@
     </changeSet>
 
     <!-- New ChangeSet for Token Blacklist Table -->
-    <changeSet id="5" author="init">
+    <changeSet id="create_token_blacklist_entry" author="Oleksandr">
         <createTable tableName="token_blacklist_entry">
             <column name="token" type="TEXT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -73,5 +73,11 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="add-unique-constraint-card-token" author="Oleksandr">
+        <addUniqueConstraint columnNames="card_token"
+                             constraintName="unique_card_token"
+                             tableName="credit_cards"/>
     </changeSet>
 </databaseChangeLog>

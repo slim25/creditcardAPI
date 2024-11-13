@@ -2,6 +2,7 @@ package com.interview.task.creditcardAPI.service.impl;
 
 import com.interview.task.creditcardAPI.dto.CreditCardDTO;
 import com.interview.task.creditcardAPI.dto.CreditCardRequestDTO;
+import com.interview.task.creditcardAPI.exception.DuplicateCreditCardException;
 import com.interview.task.creditcardAPI.model.CreditCard;
 import com.interview.task.creditcardAPI.model.User;
 import com.interview.task.creditcardAPI.repository.jpa.CreditCardRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +35,7 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCard saveCreditCard(CreditCardRequestDTO dto) throws Exception {
+    public CreditCardDTO saveCreditCard(CreditCardRequestDTO dto) throws Exception {
         String cardToken = dto.getCardToken();
         String last4Digits = dto.getLast4Digits();
 
@@ -43,6 +45,11 @@ public class CreditCardServiceImpl implements CreditCardService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found with username: " + username));
 
+        creditCardRepository.findByCardTokenAndUser_Id(cardToken, user.getId())
+                .ifPresent(existingCard -> {
+                    throw new DuplicateCreditCardException("Credit card already exists with the same token for this user.");
+                });
+
         CreditCard creditCard = new CreditCard();
         creditCard.setMaskedCardNumber("**** **** **** " + last4Digits);
         creditCard.setCardHolderName(dto.getCardHolderName());
@@ -50,7 +57,14 @@ public class CreditCardServiceImpl implements CreditCardService {
         creditCard.setUser(user);
         creditCard.setCardToken(cardToken);
 
-        return creditCardRepository.save(creditCard);
+        CreditCard savedCard = creditCardRepository.save(creditCard);
+
+        return new CreditCardDTO(
+                savedCard.getMaskedCardNumber(),
+                savedCard.getCardHolderName(),
+                savedCard.getExpiryDate(),
+                savedCard.getCardToken()
+        );
     }
 
     @Override
@@ -83,10 +97,16 @@ public class CreditCardServiceImpl implements CreditCardService {
 
 
     @Override
-    public List<CreditCardDTO> getAllCreditCardsForUser(User user) {
-        List<CreditCard> creditCards = creditCardRepository.findByUser(user);
+    public List<CreditCardDTO> getCreditCardsByUserId(Long userId) {
+        List<CreditCard> creditCards = creditCardRepository.findByUser_Id(userId);
         return creditCards.stream()
                 .map(card -> new CreditCardDTO(card.getMaskedCardNumber(), card.getCardHolderName(), card.getExpiryDate(), card.getCardToken()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteCreditCardByToken(String token) {
+        Optional<CreditCard> creditCard = creditCardRepository.findByCardToken(token);
+        creditCard.ifPresent(creditCardRepository::delete);
     }
 }
