@@ -31,7 +31,7 @@ A backend API service built with Spring Boot to manage user registrations, profi
 * **Liquibase** for database migration
 * **Jacoco** for test coverage reporting
 
-Setup & Run
+## Setup & Run
 1. **Clone Repositories**: Ensure both `creditcardAPI` (backend) and `creditcardUI` (frontend) repositories are cloned in the same directory.
 
 3. **Environment Requirements**:
