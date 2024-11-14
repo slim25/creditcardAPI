@@ -1,9 +1,14 @@
-# Use an official Java runtime
-FROM openjdk:20-jdk-slim
+FROM openjdk:20-slim
 
 WORKDIR /app
 
-COPY build/libs/creditcardAPI-0.0.1-SNAPSHOT.jar app.jar
+# Copy source files
+COPY . .
+
+RUN chmod +x ./gradlew
+
+# Build the application without running integration tests
+RUN ./gradlew clean build -x integrationTest --no-daemon
 
 # Set environment variables for database and JWT configuration
 ENV SPRING_DATA_MONGODB_URI=mongodb://apiuser:myTestPass1111@mongodb:27017/creditcardAPI
@@ -18,4 +23,4 @@ ENV SPRING_REDIS_PORT=6379
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "build/libs/creditcardAPI-0.0.1-SNAPSHOT.jar"]

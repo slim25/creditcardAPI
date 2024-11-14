@@ -35,7 +35,7 @@ A backend API service built with Spring Boot to manage user registrations, profi
 1. **Clone Repositories**: Ensure both `creditcardAPI` (backend) and `creditcardUI` (frontend) repositories are cloned in the same directory.
 
 3. **Environment Requirements**:
-   * **Java 17+**
+   * **Java 20+**
    * **Docker & Docker Compose**
 7. **Run the Application**: From the `creditcardAPI` directory, run:
 
