@@ -105,8 +105,12 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public void deleteCreditCardByToken(String token) {
-        Optional<CreditCard> creditCard = creditCardRepository.findByCardToken(token);
-        creditCard.ifPresent(creditCardRepository::delete);
+    public boolean deleteCreditCardByToken(String token, Long userId) {
+        Optional<CreditCard> creditCard = creditCardRepository.findByCardTokenAndUser_Id(token, userId);
+        if (creditCard.isPresent()) {
+            creditCardRepository.delete(creditCard.get());
+            return true;
+        }
+        return false;
     }
 }

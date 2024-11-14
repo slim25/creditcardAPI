@@ -6,6 +6,7 @@ import com.interview.task.creditcardAPI.repository.jpa.TokenBlacklistRepository;
 import com.interview.task.creditcardAPI.service.AuthService;
 import com.interview.task.creditcardAPI.service.UserActivityLogService;
 import com.interview.task.creditcardAPI.utils.UserUtils;
+import com.interview.task.creditcardAPI.utils.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +29,21 @@ public class AuthController {
     private final UserActivityLogService activityLogService;
     private final UserUtils userUtils;
     private final AuthService authService;
+    private final ValidationUtils validationUtils;
 
     @Autowired
     public AuthController(TokenBlacklistRepository tokenBlacklistRepository, UserActivityLogService activityLogService,
-                          UserUtils userUtils, AuthService authService) {
+                          UserUtils userUtils, AuthService authService, ValidationUtils validationUtils) {
         this.tokenBlacklistRepository = tokenBlacklistRepository;
         this.activityLogService = activityLogService;
         this.userUtils = userUtils;
         this.authService = authService;
+        this.validationUtils = validationUtils;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
+    public ResponseEntity<String> register(@RequestBody User user) { // substitute user with DTO
+        validationUtils.validateUserRegistration(user);
         authService.registerUser(user);
 
         LOG.debug("User {} registered in successfully with role {}", user.getUsername(), user.getRoles());
@@ -50,6 +54,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        validationUtils.validateUserLogin(loginRequest);
         String username = null;
         try {
             username = loginRequest.getUsername();

@@ -3,6 +3,7 @@ package com.interview.task.creditcardAPI.handler;
 import com.interview.task.creditcardAPI.exception.DuplicateCreditCardException;
 import com.interview.task.creditcardAPI.exception.InvalidTokenException;
 import com.interview.task.creditcardAPI.exception.RefreshTokenExpiredException;
+import com.interview.task.creditcardAPI.exception.UserAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,5 +40,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
         LOG.error("Refresh token expired exception", ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        LOG.error("User already exists", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

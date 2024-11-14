@@ -5,6 +5,9 @@ import lombok.Data;
 
 @Data
 @Entity
+@Table(name = "credit_card", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "card_token"})
+})
 public class CreditCard {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,7 +17,7 @@ public class CreditCard {
     private String cardHolderName;
     private String expiryDate;
 
-    @Column(name = "card_token", unique = true, nullable = false)
+    @Column(name = "card_token", nullable = false)
     private String cardToken;
 
     @ManyToOne

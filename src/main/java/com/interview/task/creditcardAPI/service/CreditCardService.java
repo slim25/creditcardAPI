@@ -14,5 +14,5 @@ public interface CreditCardService {
 
     List<CreditCardDTO> getCreditCardsByUserId(Long userId);
 
-    void deleteCreditCardByToken(String token);
+    boolean deleteCreditCardByToken(String token, Long userId);
 }

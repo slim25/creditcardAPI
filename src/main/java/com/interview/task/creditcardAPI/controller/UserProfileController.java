@@ -6,6 +6,7 @@ import com.interview.task.creditcardAPI.facade.UserProfileFacade;
 import com.interview.task.creditcardAPI.model.UserProfile;
 import com.interview.task.creditcardAPI.service.UserActivityLogService;
 import com.interview.task.creditcardAPI.utils.UserUtils;
+import com.interview.task.creditcardAPI.utils.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +26,21 @@ public class UserProfileController {
     private UserUtils userUtils;
     private UserActivityLogService activityLogService;
     private final UserProfileFacade userProfileFacade;
+    private final ValidationUtils validationUtils;
 
     @Autowired
-    public UserProfileController(UserProfileFacade userProfileFacade, UserUtils userUtils, UserActivityLogService activityLogService) {
+    public UserProfileController(UserProfileFacade userProfileFacade, UserUtils userUtils,
+                                 UserActivityLogService activityLogService, ValidationUtils validationUtils) {
         this.userProfileFacade = userProfileFacade;
         this.userUtils = userUtils;
         this.activityLogService = activityLogService;
+        this.validationUtils = validationUtils;
     }
 
     @PostMapping
     public ResponseEntity<UserProfileDTO> createOrUpdateUserProfile(@AuthenticationPrincipal UserDetails userDetails,
                                                             @RequestBody UserProfile userProfile) {
+        validationUtils.validateCreateOrUpdateUserProfile(userDetails, userProfile);
         Optional<UserProfileDTO> updatedUserProfile = userProfileFacade.createOrUpdateUserProfile(userDetails, userProfile);
         if (updatedUserProfile.isPresent()) {
             UserProfileDTO updatedUserProfileValue = updatedUserProfile.get();
@@ -52,6 +57,7 @@ public class UserProfileController {
 
     @GetMapping
     public ResponseEntity<UserProfileDTO> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        validationUtils.validateGetUserProfile(userDetails);
         Optional<UserProfileDTO> userProfile = userProfileFacade.getUserProfile(userDetails);
 
         if (userProfile.isPresent()) {

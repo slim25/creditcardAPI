@@ -34,9 +34,9 @@
         </createTable>
     </changeSet>
 
-    <!-- Create the Credit Cards Table -->
-    <changeSet id="create_credit_cards_table" author="Oleksandr">
-        <createTable tableName="credit_cards">
+    <!-- Create the Credit Card Table -->
+    <changeSet id="create_credit_card_table" author="Oleksandr">
+        <createTable tableName="credit_card">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -45,7 +45,7 @@
             <column name="expiry_date" type="VARCHAR(10)" />
             <column name="masked_card_number" type="VARCHAR(20)" />
             <column name="card_token" type="VARCHAR(50)">
-                <constraints unique="true"/>
+                <constraints nullable="false"/>
             </column>
 
             <column name="user_id" type="BIGINT">
@@ -75,9 +75,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="add-unique-constraint-card-token" author="Oleksandr">
-        <addUniqueConstraint columnNames="card_token"
-                             constraintName="unique_card_token"
-                             tableName="credit_cards"/>
+    <!-- Add Composite Unique Constraint on user_id and card_token -->
+    <changeSet id="add_composite_unique_constraint_on_credit_card" author="Oleksandr">
+        <addUniqueConstraint
+                tableName="credit_card"
+                columnNames="user_id, card_token"
+                constraintName="uk_user_id_card_token" />
     </changeSet>
 </databaseChangeLog>

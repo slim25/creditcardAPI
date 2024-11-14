@@ -2,14 +2,17 @@ package com.interview.task.creditcardAPI.controller;
 
 import com.interview.task.creditcardAPI.dto.CreditCardDTO;
 import com.interview.task.creditcardAPI.dto.CreditCardRequestDTO;
+import com.interview.task.creditcardAPI.dto.DeleteCreditCardRequestDTO;
 import com.interview.task.creditcardAPI.model.CreditCard;
 import com.interview.task.creditcardAPI.repository.jpa.UserRepository;
 import com.interview.task.creditcardAPI.service.CreditCardService;
 import com.interview.task.creditcardAPI.service.UserActivityLogService;
 import com.interview.task.creditcardAPI.utils.UserUtils;
+import com.interview.task.creditcardAPI.utils.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,19 +31,22 @@ public class CreditCardController {
 
     private UserActivityLogService activityLogService;
     private UserUtils userUtils;
+    private final ValidationUtils validationUtils;
 
     @Autowired
     public CreditCardController(CreditCardService creditCardService, UserRepository userRepository,
-                                UserActivityLogService activityLogService, UserUtils userUtils) {
+                                UserActivityLogService activityLogService, UserUtils userUtils, ValidationUtils validationUtils) {
         this.creditCardService = creditCardService;
         this.userRepository = userRepository;
         this.activityLogService = activityLogService;
         this.userUtils = userUtils;
+        this.validationUtils = validationUtils;
     }
 
     @PostMapping
     public ResponseEntity<CreditCardDTO> createCreditCard(@RequestBody CreditCardRequestDTO creditCardRequestDTO) throws Exception {
         LOG.debug("Received request to create a new credit card for holder");
+        validationUtils.validateCreateCreditCardRequest(creditCardRequestDTO);
         CreditCardDTO savedCardResponseDTO = creditCardService.saveCreditCard(creditCardRequestDTO);
 
         Long userId = userUtils.getCurrentUserId();
@@ -66,6 +72,8 @@ public class CreditCardController {
     @GetMapping
     public ResponseEntity<List<CreditCardDTO>> getUserCreditCards(@AuthenticationPrincipal UserDetails userDetails) {
 
+        validationUtils.validateGetUserCreditCards(userDetails);
+
         Long userId = userUtils.getCurrentUserId(userDetails.getUsername());
         List<CreditCardDTO> creditCards = creditCardService.getCreditCardsByUserId(userId);
 
@@ -86,14 +94,19 @@ public class CreditCardController {
         return ResponseEntity.ok(creditCard);
     }
 
-    @DeleteMapping("/{token}")
-    public ResponseEntity<Void> deleteCreditCardByToken(@PathVariable String token) {
-        creditCardService.deleteCreditCardByToken(token);
+    @DeleteMapping
+    public ResponseEntity<Void> deleteCreditCardByToken(@RequestBody DeleteCreditCardRequestDTO request) {
 
+        validationUtils.validateDeleteCreditCardByToken(request);
+
+        boolean deleted = creditCardService.deleteCreditCardByToken(request.getToken(), request.getUserId());
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         Long userId = userUtils.getCurrentUserId();
         activityLogService.logActivity(userId, "DELETE_CREDIT_CARD_BY_TOKEN", "Successfully deleted credit card with token");
 
-        LOG.debug("Successfully deleted credit card with token: {}", token);
+        LOG.debug("Successfully deleted credit card");
         return ResponseEntity.noContent().build();
     }
 }

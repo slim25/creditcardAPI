@@ -15,8 +15,11 @@ import java.util.List;
 @Service
 public class UserActivityLogServiceImpl implements UserActivityLogService {
 
+    private final UserActivityLogRepository activityLogRepository;
     @Autowired
-    private UserActivityLogRepository activityLogRepository;
+    public UserActivityLogServiceImpl(UserActivityLogRepository activityLogRepository) {
+        this.activityLogRepository = activityLogRepository;
+    }
 
     @Override
     public void logActivity(Long userId, String activityType, String details) {
