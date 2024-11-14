@@ -82,4 +82,24 @@
                 columnNames="user_id, card_token"
                 constraintName="uk_user_id_card_token" />
     </changeSet>
+    <changeSet id="create_user_roles_collection_table" author="Oleksandr">
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_user_roles_user" references="users(id)"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert_sample_user_roles" author="Oleksandr">
+        <insert tableName="user_roles">
+            <column name="user_id" value="1"/>
+            <column name="role" value="ROLE_ADMIN"/>
+        </insert>
+    </changeSet>
+    <changeSet id="alter_card_token_length" author="Oleksandr">
+        <modifyDataType tableName="credit_card" columnName="card_token" newDataType="VARCHAR(255)"/>
+    </changeSet>
 </databaseChangeLog>

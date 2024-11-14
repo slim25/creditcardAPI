@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://apiuser:myTestPass1111@mongodb:27017/creditcardAPI
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/creditcardapi
+      SPRING_DATASOURCE_USERNAME: postgresAdmin
+      SPRING_DATASOURCE_PASSWORD: myTestPass1111
+      JWT_SECRET: super_long_secret_key_here_that_is_at_least_64_characters_long_to_meet_security_requirements
+      JWT_ACCESS_EXPIRATION_MS: 20000
+      JWT_REFRESH_EXPIRATION_MS: 40000
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ../creditcardui
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+
+  mongodb:
+    image: mongo:5.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoAdmin
+      MONGO_INITDB_ROOT_PASSWORD: myTestPass1111
+    volumes:
+      - ./init-user.js:/docker-entrypoint-initdb.d/init-user.js:ro
+    ports:
+      - "27017:27017"
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: creditcardapi
+      POSTGRES_USER: postgresAdmin
+      POSTGRES_PASSWORD: myTestPass1111
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

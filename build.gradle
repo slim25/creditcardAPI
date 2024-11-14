@@ -91,7 +91,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.register("jacocoIntegrationTestReport", JacocoReport) {
-	dependsOn tasks.integrationTest
+	dependsOn tasks.test, tasks.integrationTest
 	sourceSets sourceSets.main
 
 	executionData.from(fileTree(layout.buildDirectory.dir("jacoco").get().asFile).include("*.exec"))
